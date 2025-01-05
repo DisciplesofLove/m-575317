@@ -17,12 +17,17 @@ const SignUp = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
     try {
       // TODO: Implement actual registration
+      // For now, we'll simulate a successful registration
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       toast({
         title: "Success",
         description: "Account created successfully",
@@ -34,6 +39,8 @@ const SignUp = () => {
         title: "Error",
         description: "Failed to create account",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -59,6 +66,7 @@ const SignUp = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -72,6 +80,7 @@ const SignUp = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -85,18 +94,20 @@ const SignUp = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full">
-              Create Account
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Creating account..." : "Create Account"}
             </Button>
             <Button
               type="button"
               variant="outline"
               className="w-full"
               onClick={() => navigate("/signin")}
+              disabled={isLoading}
             >
               Already have an account?
             </Button>

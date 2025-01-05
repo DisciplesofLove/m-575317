@@ -1,14 +1,13 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { ChatSidebar } from "@/components/ChatSidebar";
+import { ChatMessages } from "@/components/ChatMessages";
 
-const Index = () => {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    navigate("/signin");
-  }, [navigate]);
-
-  return null;
+const Chat = () => {
+  return (
+    <div className="flex h-screen">
+      <ChatSidebar />
+      <ChatMessages />
+    </div>
+  );
 };
 
-export default Index;
+export default Chat;
