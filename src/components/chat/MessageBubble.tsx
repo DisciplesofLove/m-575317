@@ -1,4 +1,3 @@
-import { Check, ThumbsUp, MessageSquare } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Message } from "@/types/chat";
 import { currentUser } from "@/data/mockData";
@@ -6,12 +5,7 @@ import { formatTimestamp } from "@/lib/utils";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { MessageActions } from "./MessageActions";
 
 interface MessageBubbleProps {
   message: Message;
@@ -23,43 +17,6 @@ export const MessageBubble = ({ message, onReply }: MessageBubbleProps) => {
   const [likes, setLikes] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [translatedContent, setTranslatedContent] = useState<string | null>(null);
-
-  const handleLike = async () => {
-    try {
-      const { data: existingLike } = await supabase
-        .from('reactions')
-        .select()
-        .eq('message_id', message.id)
-        .eq('user_id', currentUser.id)
-        .eq('type', 'like')
-        .single();
-
-      if (existingLike) {
-        await supabase
-          .from('reactions')
-          .delete()
-          .eq('id', existingLike.id);
-        setLikes(prev => prev - 1);
-        setIsLiked(false);
-      } else {
-        await supabase
-          .from('reactions')
-          .insert({
-            message_id: message.id,
-            user_id: currentUser.id,
-            type: 'like'
-          });
-        setLikes(prev => prev + 1);
-        setIsLiked(true);
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update like",
-      });
-    }
-  };
 
   const handleTranslate = async () => {
     if (translatedContent) {
@@ -81,8 +38,6 @@ export const MessageBubble = ({ message, onReply }: MessageBubbleProps) => {
         if (translatedText) {
           setTranslatedContent(translatedText);
         } else {
-          // Here you would typically call a translation API
-          // For now, we'll just show a mock translation
           setTranslatedContent("Translated text would appear here");
         }
       }
@@ -110,58 +65,15 @@ export const MessageBubble = ({ message, onReply }: MessageBubbleProps) => {
         </div>
         <div className="flex items-center gap-2 text-xs text-muted">
           {formatTimestamp(new Date(message.created_at))}
-          <div className="flex items-center gap-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={handleLike}
-                    className={`p-1 rounded hover:bg-white/10 transition-colors ${
-                      isLiked ? "text-accent" : ""
-                    }`}
-                  >
-                    <ThumbsUp className="w-3 h-3" />
-                    {likes > 0 && <span className="ml-1">{likes}</span>}
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{isLiked ? "Unlike" : "Like"}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => onReply?.(message.id)}
-                    className="p-1 rounded hover:bg-white/10 transition-colors"
-                  >
-                    <MessageSquare className="w-3 h-3" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Reply</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={handleTranslate}
-                    className="p-1 rounded hover:bg-white/10 transition-colors"
-                  >
-                    {translatedContent ? "Original" : "Translate"}
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{translatedContent ? "Show original" : "Translate message"}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
+          <MessageActions
+            messageId={message.id}
+            userId={currentUser.id}
+            isLiked={isLiked}
+            likes={likes}
+            onReply={() => onReply?.(message.id)}
+            onTranslate={handleTranslate}
+            hasTranslation={!!translatedContent}
+          />
         </div>
       </div>
     </div>
