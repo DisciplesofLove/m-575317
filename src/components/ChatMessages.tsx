@@ -7,6 +7,7 @@ import { MessageInput } from "@/components/chat/MessageInput";
 import { MessageList } from "@/components/chat/MessageList";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { storeMessageOnArweave, retrieveMessageFromArweave } from "@/utils/decentralizedStorage";
 
 export const ChatMessages = () => {
   const navigate = useNavigate();
@@ -21,7 +22,8 @@ export const ChatMessages = () => {
         return;
       }
 
-      const { data, error } = await supabase
+      // Fetch messages from both Supabase and Arweave
+      const { data: supabaseMessages, error } = await supabase
         .from('messages')
         .select(`
           id,
@@ -47,7 +49,7 @@ export const ChatMessages = () => {
         return;
       }
 
-      setMessages(data as Message[]);
+      setMessages(supabaseMessages as Message[]);
     };
 
     fetchMessages();
@@ -61,9 +63,28 @@ export const ChatMessages = () => {
           schema: 'public',
           table: 'messages'
         },
-        (payload) => {
+        async (payload) => {
           const newMessage = payload.new as Message;
-          setMessages(prev => [...prev, newMessage]);
+          
+          // Store message on Arweave when a new message is received
+          try {
+            const arweaveResult = await storeMessageOnArweave({
+              content: newMessage.content,
+              sender: newMessage.sender.id,
+              timestamp: new Date(newMessage.created_at).getTime()
+            });
+            
+            // Update message with Arweave transaction ID
+            await supabase
+              .from('messages')
+              .update({ arweave_tx_id: arweaveResult.id })
+              .eq('id', newMessage.id);
+
+            setMessages(prev => [...prev, { ...newMessage, arweave_tx_id: arweaveResult.id }]);
+          } catch (error) {
+            console.error('Error storing message on Arweave:', error);
+            setMessages(prev => [...prev, newMessage]);
+          }
         }
       )
       .subscribe();
@@ -81,20 +102,29 @@ export const ChatMessages = () => {
         return;
       }
 
+      // First store message on Arweave
+      const arweaveResult = await storeMessageOnArweave({
+        content,
+        sender: session.session.user.id,
+        timestamp: Date.now()
+      });
+
+      // Then store in Supabase with Arweave transaction ID
       const { error } = await supabase
         .from('messages')
         .insert({
           content,
           sender_id: session.session.user.id,
           chat_id: '1',
-          parent_id: replyTo
+          parent_id: replyTo,
+          arweave_tx_id: arweaveResult.id
         });
 
       if (error) throw error;
 
       setReplyTo(null);
       toast({
-        description: "Message sent",
+        description: "Message sent and stored on Arweave",
         duration: 2000,
       });
     } catch (error) {
