@@ -29,6 +29,7 @@ export const ChatMessages = () => {
           created_at,
           translated_content,
           parent_id,
+          chat_id,
           sender:profiles!sender_id (
             id,
             username,
@@ -46,7 +47,7 @@ export const ChatMessages = () => {
         return;
       }
 
-      setMessages(data || []);
+      setMessages(data as Message[]);
     };
 
     fetchMessages();
@@ -62,7 +63,8 @@ export const ChatMessages = () => {
           table: 'messages'
         },
         (payload) => {
-          setMessages(prev => [...prev, payload.new as Message]);
+          const newMessage = payload.new as Message;
+          setMessages(prev => [...prev, newMessage]);
         }
       )
       .subscribe();

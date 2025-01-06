@@ -1,33 +1,18 @@
+import { Json } from "@/integrations/supabase/types";
+
 export interface User {
   id: string;
-  name: string;
-  avatar: string;
-  status: "online" | "offline" | "away";
-  lastSeen?: Date;
+  username?: string | null;
+  avatar_url?: string | null;
 }
 
 export interface Message {
   id: string;
   content: string;
   sender: User;
-  receiver: User;
-  timestamp: Date;
-  status: "sent" | "delivered" | "read";
-  type: "text" | "image" | "file";
-  metadata?: {
-    fileName?: string;
-    fileSize?: number;
-    mimeType?: string;
-    imageUrl?: string;
-  };
-}
-
-export interface Chat {
-  id: string;
-  participants: User[];
-  messages: Message[];
-  lastMessage?: Message;
-  unreadCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: string;
+  translated_content?: Json | null;
+  parent_id?: string | null;
+  chat_id: string;
+  likes?: number;
 }

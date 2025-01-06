@@ -76,12 +76,15 @@ export const MessageBubble = ({ message, onReply }: MessageBubbleProps) => {
 
       if (error) throw error;
 
-      if (data.translated_content && data.translated_content.en) {
-        setTranslatedContent(data.translated_content.en);
-      } else {
-        // Here you would typically call a translation API
-        // For now, we'll just show a mock translation
-        setTranslatedContent("Translated text would appear here");
+      if (data?.translated_content && typeof data.translated_content === 'object') {
+        const translatedText = (data.translated_content as { [key: string]: string })?.en;
+        if (translatedText) {
+          setTranslatedContent(translatedText);
+        } else {
+          // Here you would typically call a translation API
+          // For now, we'll just show a mock translation
+          setTranslatedContent("Translated text would appear here");
+        }
       }
     } catch (error) {
       toast({
@@ -96,8 +99,8 @@ export const MessageBubble = ({ message, onReply }: MessageBubbleProps) => {
     <div className={`flex items-end gap-2 ${isCurrentUser ? "flex-row-reverse" : ""}`}>
       <Avatar className="w-8 h-8">
         <img 
-          src={message.sender.avatar}
-          alt={message.sender.name}
+          src={message.sender.avatar_url || ''}
+          alt={message.sender.username || 'User'}
           className="object-cover"
         />
       </Avatar>
@@ -106,12 +109,7 @@ export const MessageBubble = ({ message, onReply }: MessageBubbleProps) => {
           {translatedContent || message.content}
         </div>
         <div className="flex items-center gap-2 text-xs text-muted">
-          {formatTimestamp(message.timestamp)}
-          {isCurrentUser && (
-            <Check 
-              className={`w-3 h-3 ${message.status === "read" ? "text-accent" : ""}`} 
-            />
-          )}
+          {formatTimestamp(new Date(message.created_at))}
           <div className="flex items-center gap-2">
             <TooltipProvider>
               <Tooltip>
