@@ -10,12 +10,12 @@ export const ChatSidebar = () => {
         <div className="flex items-center gap-2">
           <Avatar className="w-8 h-8">
             <img 
-              src={currentUser.avatar}
-              alt={currentUser.name}
+              src={currentUser.avatar_url || ''}
+              alt={currentUser.username || 'User'}
               className="object-cover"
             />
           </Avatar>
-          <span className="font-medium">{currentUser.name}</span>
+          <span className="font-medium">{currentUser.username}</span>
         </div>
         <button className="p-2 hover:bg-white/5 rounded-full transition-colors">
           <Plus className="w-5 h-5" />
@@ -37,20 +37,17 @@ export const ChatSidebar = () => {
             key={contact.id}
             className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors"
           >
-            <Avatar className="w-10 h-10 relative">
-              <img src={contact.avatar} alt={contact.name} className="object-cover" />
-              {contact.status === "online" && (
-                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
-              )}
+            <Avatar className="w-10 h-10">
+              <img 
+                src={contact.avatar_url || ''} 
+                alt={contact.username || 'User'} 
+                className="object-cover" 
+              />
             </Avatar>
             <div className="flex-1 min-w-0">
-              <div className="font-medium">{contact.name}</div>
+              <div className="font-medium">{contact.username}</div>
               <div className="text-sm text-muted truncate">
-                {contact.status === "online" 
-                  ? "Active now"
-                  : contact.lastSeen 
-                    ? `Last seen ${formatDistanceToNow(contact.lastSeen, { addSuffix: true })}`
-                    : "Offline"}
+                Active now
               </div>
             </div>
           </div>
