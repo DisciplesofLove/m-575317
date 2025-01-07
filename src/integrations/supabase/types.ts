@@ -16,6 +16,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          ipfs_hash: string | null
           likes: number | null
           parent_id: string | null
           sender_id: string
@@ -27,6 +28,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          ipfs_hash?: string | null
           likes?: number | null
           parent_id?: string | null
           sender_id: string
@@ -38,6 +40,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          ipfs_hash?: string | null
           likes?: number | null
           parent_id?: string | null
           sender_id?: string

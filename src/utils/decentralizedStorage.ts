@@ -1,6 +1,5 @@
 import Arweave from 'arweave';
 import { PinataClient } from '@pinata/sdk';
-import { supabase } from '@/integrations/supabase/client';
 
 // Initialize Arweave
 const arweave = Arweave.init({
