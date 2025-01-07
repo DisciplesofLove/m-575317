@@ -15,4 +15,6 @@ export interface Message {
   parent_id?: string | null;
   chat_id: string;
   likes?: number;
+  arweave_tx_id?: string | null;
+  ipfs_hash?: string | null;
 }

@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       messages: {
         Row: {
+          arweave_tx_id: string | null
           chat_id: string
           content: string
           created_at: string
@@ -21,6 +22,7 @@ export type Database = {
           translated_content: Json | null
         }
         Insert: {
+          arweave_tx_id?: string | null
           chat_id: string
           content: string
           created_at?: string
@@ -31,6 +33,7 @@ export type Database = {
           translated_content?: Json | null
         }
         Update: {
+          arweave_tx_id?: string | null
           chat_id?: string
           content?: string
           created_at?: string

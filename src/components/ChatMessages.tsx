@@ -7,7 +7,7 @@ import { MessageInput } from "@/components/chat/MessageInput";
 import { MessageList } from "@/components/chat/MessageList";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { storeMessageOnArweave, retrieveMessageFromArweave } from "@/utils/decentralizedStorage";
+import { storeMessageOnArweave, storeMessageOnIPFS } from "@/utils/decentralizedStorage";
 
 export const ChatMessages = () => {
   const navigate = useNavigate();
@@ -22,8 +22,7 @@ export const ChatMessages = () => {
         return;
       }
 
-      // Fetch messages from both Supabase and Arweave
-      const { data: supabaseMessages, error } = await supabase
+      const { data: messages, error } = await supabase
         .from('messages')
         .select(`
           id,
@@ -32,6 +31,7 @@ export const ChatMessages = () => {
           translated_content,
           parent_id,
           chat_id,
+          arweave_tx_id,
           sender:profiles!sender_id (
             id,
             username,
@@ -49,7 +49,7 @@ export const ChatMessages = () => {
         return;
       }
 
-      setMessages(supabaseMessages as Message[]);
+      setMessages(messages as Message[]);
     };
 
     fetchMessages();
@@ -66,23 +66,39 @@ export const ChatMessages = () => {
         async (payload) => {
           const newMessage = payload.new as Message;
           
-          // Store message on Arweave when a new message is received
           try {
-            const arweaveResult = await storeMessageOnArweave({
-              content: newMessage.content,
-              sender: newMessage.sender.id,
-              timestamp: new Date(newMessage.created_at).getTime()
-            });
+            // Store message on both Arweave and IPFS
+            const [arweaveResult, ipfsHash] = await Promise.all([
+              storeMessageOnArweave({
+                content: newMessage.content,
+                sender: newMessage.sender.id,
+                timestamp: new Date(newMessage.created_at).getTime()
+              }),
+              storeMessageOnIPFS({
+                content: newMessage.content,
+                sender: newMessage.sender.id,
+                timestamp: new Date(newMessage.created_at).getTime()
+              })
+            ]);
             
-            // Update message with Arweave transaction ID
-            await supabase
+            // Update message with decentralized storage IDs
+            const { error: updateError } = await supabase
               .from('messages')
-              .update({ arweave_tx_id: arweaveResult.id })
+              .update({ 
+                arweave_tx_id: arweaveResult.id,
+                ipfs_hash: ipfsHash 
+              })
               .eq('id', newMessage.id);
 
-            setMessages(prev => [...prev, { ...newMessage, arweave_tx_id: arweaveResult.id }]);
+            if (updateError) throw updateError;
+
+            setMessages(prev => [...prev, { 
+              ...newMessage, 
+              arweave_tx_id: arweaveResult.id,
+              ipfs_hash: ipfsHash 
+            }]);
           } catch (error) {
-            console.error('Error storing message on Arweave:', error);
+            console.error('Error storing message:', error);
             setMessages(prev => [...prev, newMessage]);
           }
         }
@@ -102,14 +118,21 @@ export const ChatMessages = () => {
         return;
       }
 
-      // First store message on Arweave
-      const arweaveResult = await storeMessageOnArweave({
-        content,
-        sender: session.session.user.id,
-        timestamp: Date.now()
-      });
+      // Store message on both Arweave and IPFS first
+      const [arweaveResult, ipfsHash] = await Promise.all([
+        storeMessageOnArweave({
+          content,
+          sender: session.session.user.id,
+          timestamp: Date.now()
+        }),
+        storeMessageOnIPFS({
+          content,
+          sender: session.session.user.id,
+          timestamp: Date.now()
+        })
+      ]);
 
-      // Then store in Supabase with Arweave transaction ID
+      // Then store in Supabase with decentralized storage IDs
       const { error } = await supabase
         .from('messages')
         .insert({
@@ -117,14 +140,15 @@ export const ChatMessages = () => {
           sender_id: session.session.user.id,
           chat_id: '1',
           parent_id: replyTo,
-          arweave_tx_id: arweaveResult.id
+          arweave_tx_id: arweaveResult.id,
+          ipfs_hash: ipfsHash
         });
 
       if (error) throw error;
 
       setReplyTo(null);
       toast({
-        description: "Message sent and stored on Arweave",
+        description: "Message sent and stored on decentralized networks",
         duration: 2000,
       });
     } catch (error) {
