@@ -1,5 +1,5 @@
 import Arweave from 'arweave';
-import { PinataClient } from '@pinata/sdk';
+import Pinata from '@pinata/sdk';
 
 // Initialize Arweave
 const arweave = Arweave.init({
@@ -9,7 +9,7 @@ const arweave = Arweave.init({
 });
 
 // Initialize Pinata (you'll need to add PINATA_API_KEY and PINATA_SECRET_KEY to your environment)
-const pinata = new PinataClient({ 
+const pinata = new Pinata({ 
   pinataApiKey: process.env.PINATA_API_KEY as string,
   pinataSecretApiKey: process.env.PINATA_SECRET_KEY as string
 });
