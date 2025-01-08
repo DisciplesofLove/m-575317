@@ -1,5 +1,5 @@
 import Arweave from 'arweave';
-import PinataSDK from '@pinata/sdk';
+import { default as Pinata } from '@pinata/sdk';
 
 // Initialize Arweave
 const arweave = Arweave.init({
@@ -8,11 +8,8 @@ const arweave = Arweave.init({
   protocol: 'https'
 });
 
-// Initialize Pinata (you'll need to add PINATA_API_KEY and PINATA_SECRET_KEY to your environment)
-const pinata = new PinataSDK(
-  process.env.PINATA_API_KEY || '',
-  process.env.PINATA_SECRET_KEY || ''
-);
+// Initialize Pinata with dummy keys for now
+const pinata = new Pinata('dummy-key', 'dummy-secret');
 
 interface MessageData {
   content: string;
