@@ -1,1 +1,4 @@
 project_id = "ievhywwljnddbveebemw"
+
+[functions.store-ipfs]
+verify_jwt = false

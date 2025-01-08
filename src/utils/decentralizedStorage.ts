@@ -1,4 +1,5 @@
 import Arweave from 'arweave';
+import { supabase } from '@/integrations/supabase/client';
 
 // Initialize Arweave
 const arweave = Arweave.init({
@@ -27,11 +28,13 @@ export const storeMessageOnArweave = async (messageData: MessageData) => {
 
 export const storeMessageOnIPFS = async (messageData: MessageData) => {
   try {
-    // For now, we'll use a mock IPFS hash since we can't use Pinata in the browser
-    // In a production environment, you would want to use a backend service to handle IPFS storage
-    const mockIpfsHash = `ipfs-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-    console.log('Storing message on IPFS (mock):', messageData);
-    return mockIpfsHash;
+    const { data, error } = await supabase.functions.invoke('store-ipfs', {
+      body: { messageData }
+    });
+
+    if (error) throw error;
+    console.log('Successfully stored message on IPFS:', data);
+    return data.ipfsHash;
   } catch (error) {
     console.error('Error storing on IPFS:', error);
     throw error;
