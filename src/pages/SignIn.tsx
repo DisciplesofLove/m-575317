@@ -53,11 +53,11 @@ const SignIn = () => {
       {/* Right side - Image */}
       <div className="hidden md:block md:w-1/2 relative">
         <img
-          src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7"
-          alt="Code visualization"
+          src="https://images.unsplash.com/photo-1579547621706-1a9c79d5c9f1"
+          alt="Colorful abstract art"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/70 to-background/90 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/70 via-purple-500/50 to-background/90 mix-blend-multiply" />
       </div>
     </div>
   );
