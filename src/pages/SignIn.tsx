@@ -22,14 +22,18 @@ const SignIn = () => {
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth event:", event);
+      
       if (event === 'SIGNED_IN' && session) {
+        setError(null); // Clear any existing errors
         toast({
           description: "Successfully signed in!",
         });
         navigate("/chat");
       }
-      
-      if (event === 'USER_UPDATED' && !session) {
+
+      // Handle various error cases
+      if (event === 'SIGN_IN' && !session) {
         setError("Invalid login credentials. Please try again.");
       }
     });
