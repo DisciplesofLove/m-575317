@@ -28,6 +28,7 @@ export default {
           sent: "#61AAF2",
         },
         border: "#ffffff14",
+        input: "rgba(255, 255, 255, 0.1)",
       },
       backdropBlur: {
         xs: '2px',
