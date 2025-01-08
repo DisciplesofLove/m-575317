@@ -1,13 +1,15 @@
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const SignIn = () => {
   const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -20,11 +22,15 @@ const SignIn = () => {
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
+      if (event === 'SIGNED_IN' && session) {
         toast({
           description: "Successfully signed in!",
         });
         navigate("/chat");
+      }
+      
+      if (event === 'USER_UPDATED' && !session) {
+        setError("Invalid login credentials. Please try again.");
       }
     });
 
@@ -40,9 +46,20 @@ const SignIn = () => {
             <CardTitle>Welcome Back</CardTitle>
           </CardHeader>
           <CardContent>
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             <Auth
               supabaseClient={supabase}
-              appearance={{ theme: ThemeSupa }}
+              appearance={{ 
+                theme: ThemeSupa,
+                style: {
+                  button: { background: 'rgb(147 51 234)', color: 'white' },
+                  anchor: { color: 'rgb(147 51 234)' },
+                }
+              }}
               theme="dark"
               providers={[]}
             />
