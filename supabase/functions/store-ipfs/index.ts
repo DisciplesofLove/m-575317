@@ -1,10 +1,15 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { PinataPinResponse } from 'https://esm.sh/@pinata/sdk@2.1.0/types'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+interface MessageData {
+  content: string;
+  sender: string;
+  timestamp: number;
 }
 
 serve(async (req) => {
@@ -14,13 +19,15 @@ serve(async (req) => {
   }
 
   try {
-    const { messageData } = await req.json()
+    const { messageData } = await req.json() as { messageData: MessageData }
     const PINATA_API_KEY = Deno.env.get('PINATA_API_KEY')
     const PINATA_SECRET_KEY = Deno.env.get('PINATA_SECRET_KEY')
 
     if (!PINATA_API_KEY || !PINATA_SECRET_KEY) {
       throw new Error('Pinata API keys not configured')
     }
+
+    console.log('Storing message on IPFS:', messageData)
 
     // Make request to Pinata API
     const response = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
