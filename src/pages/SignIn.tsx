@@ -33,7 +33,7 @@ const SignIn = () => {
       }
 
       // Handle various error cases
-      if (event === 'SIGN_IN' && !session) {
+      if (event === 'SIGNED_OUT' && !session) {
         setError("Invalid login credentials. Please try again.");
       }
     });
