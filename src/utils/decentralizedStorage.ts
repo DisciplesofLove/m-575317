@@ -1,5 +1,4 @@
 import Arweave from 'arweave';
-import { default as Pinata } from '@pinata/sdk';
 
 // Initialize Arweave
 const arweave = Arweave.init({
@@ -7,9 +6,6 @@ const arweave = Arweave.init({
   port: 443,
   protocol: 'https'
 });
-
-// Initialize Pinata with dummy keys for now
-const pinata = new Pinata('dummy-key', 'dummy-secret');
 
 interface MessageData {
   content: string;
@@ -31,8 +27,11 @@ export const storeMessageOnArweave = async (messageData: MessageData) => {
 
 export const storeMessageOnIPFS = async (messageData: MessageData) => {
   try {
-    const result = await pinata.pinJSONToIPFS(messageData);
-    return result.IpfsHash;
+    // For now, we'll use a mock IPFS hash since we can't use Pinata in the browser
+    // In a production environment, you would want to use a backend service to handle IPFS storage
+    const mockIpfsHash = `ipfs-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    console.log('Storing message on IPFS (mock):', messageData);
+    return mockIpfsHash;
   } catch (error) {
     console.error('Error storing on IPFS:', error);
     throw error;
